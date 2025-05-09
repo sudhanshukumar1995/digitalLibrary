@@ -31,3 +31,9 @@ security:
   user:
     name: "sudhanshu"
     password: "sudhanshu"
+  oauth2:
+	client:
+		registration:
+			github:
+				client-id:
+				client-secret:

@@ -15,44 +15,52 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class MembershipRepository {
+public class MembershipRepository
+{
 
-	private final MembershipJPARepository membershipJPARepository;
-	private final MembershipOutputMapper membershipOutputMapper;
+    private final MembershipJPARepository membershipJPARepository;
 
-	@Autowired
-	public MembershipRepository(MembershipJPARepository membershipJPARepository,
-			MembershipOutputMapper membershipOutputMapper) {
-		this.membershipJPARepository = membershipJPARepository;
-		this.membershipOutputMapper = membershipOutputMapper;
-	}
+    private final MembershipOutputMapper membershipOutputMapper;
 
-	public MembershipModel addMembership(MembershipModel membershipModel) {
-		MembershipOutputEntity outputEntity = this.membershipOutputMapper.mapFromModel(membershipModel);
-		outputEntity = this.membershipJPARepository.save(outputEntity);
-		log.info("Saved new membership with ID: {} for user with ID: {}", outputEntity.getMembership_id(),
-				outputEntity.getUser().getId());
-		return this.membershipOutputMapper.mapToModel(outputEntity);
-	}
+    @Autowired
+    public MembershipRepository(MembershipJPARepository membershipJPARepository,
+            MembershipOutputMapper membershipOutputMapper)
+    {
+        this.membershipJPARepository = membershipJPARepository;
+        this.membershipOutputMapper = membershipOutputMapper;
+    }
 
-	public MembershipModel getMembershipById(long id) {
-		return this.membershipJPARepository.findById(id).map((o) -> {
-			log.info("Membership with ID: {} was successfully found.", id);
-			return this.membershipOutputMapper.mapToModel(o);
-		}).orElseThrow(() -> new ResourceNotFoundException(MembershipModel.class, "id", String.valueOf(id)));
-	}
+    public MembershipModel addMembership(MembershipModel membershipModel)
+    {
+        MembershipOutputEntity outputEntity = this.membershipOutputMapper.mapFromModel(membershipModel);
+        outputEntity = membershipJPARepository.save(outputEntity);
+        log.info("Saved new membership with ID: {} for user with ID: {}", outputEntity.getMembership_id(),
+                outputEntity.getUser().getId());
+        return membershipOutputMapper.mapToModel(outputEntity);
+    }
 
-	public MembershipModel updateMembershipStatus(long membershipId, MembershipStatus status) {
-		MembershipOutputEntity outputEntity = this.membershipJPARepository.findById(membershipId).orElseThrow(
-				() -> new ResourceNotFoundException(MembershipOutputEntity.class, "id", String.valueOf(membershipId)));
-		outputEntity.setStatus(status);
-		outputEntity = this.membershipJPARepository.save(outputEntity);
-		log.info("Membership with ID: {} was successfully updated.", membershipId);
-		return this.membershipOutputMapper.mapToModel(outputEntity);
-	}
+    public MembershipModel getMembershipById(long id)
+    {
+        return membershipJPARepository.findById(id).map((o) ->
+        {
+            log.info("Membership with ID: {} was successfully found.", id);
+            return membershipOutputMapper.mapToModel(o);
+        }).orElseThrow(() -> new ResourceNotFoundException(MembershipModel.class, "id", String.valueOf(id)));
+    }
 
-	public Optional<MembershipOutputEntity> getNonExpiredMembershipForUser(long userId) {
-		return this.membershipJPARepository.findByUser_IdAndStatusNot(userId, MembershipStatus.EXPIRED);
-	}
+    public MembershipModel updateMembershipStatus(long membershipId, MembershipStatus status)
+    {
+        MembershipOutputEntity outputEntity = membershipJPARepository.findById(membershipId).orElseThrow(
+                () -> new ResourceNotFoundException(MembershipOutputEntity.class, "id", String.valueOf(membershipId)));
+        outputEntity.setStatus(status);
+        outputEntity = membershipJPARepository.save(outputEntity);
+        log.info("Membership with ID: {} was successfully updated.", membershipId);
+        return membershipOutputMapper.mapToModel(outputEntity);
+    }
+
+    public Optional<MembershipOutputEntity> getNonExpiredMembershipForUser(long userId)
+    {
+        return membershipJPARepository.findByUser_IdAndStatusNot(userId, MembershipStatus.EXPIRED);
+    }
 
 }
